@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import string
 import re
 from random import choice, randint, sample
@@ -10,12 +11,16 @@ class Gene(object):
         return Gene(self.operator, self.value)
     
 REOR = '|'
-dataset = []
+#dataset = []
 
 #data set is a list of dictionaries with the values
-def fitness_test(ge, print_flag=False):
-    
-    global dataset
+#TODO make it so dataset can be shared between multiple processes
+def fitness_test(work, print_flag=True):
+    ge, dataset = work
+##    ge = kwargs.get('ge')
+##    dataset = kwargs.get('dataset', [])
+##    print_flag = kwargs.get('print_flag', False)
+
     total = 0.
     correct = 0.
     incorrect = 0.
@@ -37,26 +42,29 @@ def fitness_test(ge, print_flag=False):
             incorrect += occurences
             
 
-    score = ((correct - incorrect) / total + 1.0) / (len(female_regex) **.001)
-
-    if print_flag is True:
-        
-        print 'RE : ' + female_regex
-        #print 'Correct Guesses : ' + str(correct)
-        #print 'Incorrect Guesses : ' + str(incorrect)
-        #print 'Total Occurences : ' + str(total)
-        #print 'Fitness Score : ' + str(score)
-        print '% Accuracy : ' + str((correct / total))
+    score = ((correct - incorrect) / total + 1.0) / (len(female_regex) **.00001)
+    accuracy = (correct / total)
     
-    return ge, score
+##    if print_flag is True:
+##        
+##        print 'RE : ' + female_regex
+##        #print 'Correct Guesses : ' + str(correct)
+##        #print 'Incorrect Guesses : ' + str(incorrect)
+##        #print 'Total Occurences : ' + str(total)
+##        #print 'Fitness Score : ' + str(score)
+##        print '% Accuracy : ' + str((correct / total))
+    
+    return ge, score, accuracy
 
 def generate_dataset():
+    dataset = []
     with open('names/yob1980.txt') as f:
         for line in f:
             name, gender, occurences = line.split(',')
             dataset.append({'name' : name,
                             'gender' : gender,
                             'occurences' : occurences})
+    return dataset
 
 #Utilities
 def get_random_chars(floor, ceiling):
@@ -134,10 +142,14 @@ class GeneratedExpression(object):
         
 class Pool(object):
 
-    def __init__(self, fitness, size=50, maxdepth=5):
+    def __init__(self, fitness, dataset, size=50):
+
         self.fitness = fitness
+        self.dataset = dataset
+        
         self.ge = [GeneratedExpression([]) for _ in xrange(size)]
         self.generation = 0
+        self._mp_pool = mp.Pool()
         
     def run(self, number_of_generations=10):
 
@@ -149,7 +161,10 @@ class Pool(object):
 
     @property
     def scores(self):
-        scores = [self.fitness(ge) for ge in self.ge]
+        #scores = [self.fitness((ge, self.dataset)) for ge in self.ge]
+        args = [(ge, self.dataset) for ge in self.ge]
+        scores = self._mp_pool.map(self.fitness, args)
+        
         return sorted(scores, key=lambda t: t[1], reverse=True)
     
     def strategy(self, scores):
@@ -159,13 +174,13 @@ class Pool(object):
 if __name__ == "__main__":
     
     print 'Generating Dataset'
-    generate_dataset()
-    print 'Dataset generated records returned : ' + str(len(dataset))
+    ds = generate_dataset()
+    print 'Dataset generated records returned : ' + str(len(ds))
     
     class MyPool(Pool):
 
         def strategy(self, scores):
-            top = [a for a, s in scores[:len(scores)/5]]
+            top = [a for a, s, acc in scores[:len(scores)/5]]
             mutations = [a.mutate() for a in top]
             smart_mutations = [a.smart_mutate() for a in top]
             spliced = [a.splice(b) for a, b in zip(top, sample(top, len(top)))]
@@ -173,9 +188,12 @@ if __name__ == "__main__":
 
             print #print a linebreak
             print 'Generation : ' + str(self.generation)
-            fitness_test(scores[0][0], print_flag=True)
+            print 'RE : ' + scores[0][0].build_re()
+            print '% Accuracy : ' + str(scores[0][2])
+            
+            #fitness_test((scores[0][0], self.dataset), print_flag=True)
 
             return top + mutations + branch + spliced + smart_mutations
 
-    pool = MyPool(fitness_test)
+    pool = MyPool(fitness_test, ds)
     print pool.run(10000) #run x generatations and print the results
