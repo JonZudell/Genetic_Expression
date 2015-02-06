@@ -1,9 +1,14 @@
 # Genetic_Expression
+
+## Usage
+Currently we have not made ease of use a priority however if you decide you want to play with it. You will have to edit re_ga.py directly. The file will run as is, provided you point the generate dataset function at a file that can be obtained here http://www.ssa.gov/OACT/babynames/limits.html . It has currently only been tested for python version 2.7.2 . If you're up to it you can modify the strategy function in the my pool class.
+
+
+## Inspiration
 This is a pet project a coworker and I developed after reading this article http://thedailywtf.com/articles/genderize
 
 Initially we were perplexed as to the reason someone would do try to guess a users gender based upon their name.
-What started to concern us more was how accurate the "algorithm" was at determining gender based upon name. So we found a
-dataset(http://www.ssa.gov/OACT/babynames/limits.html) of names and occurence and ran the algorithm against it. These are
+What started to concern us more was how accurate the "algorithm" was at determining gender based upon name. So we found a dataset of names and occurence and ran the algorithm against it. These are
 the results
 
 |Parameters       | Numbers   |
