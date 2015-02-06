@@ -9,40 +9,41 @@ dataset = []
 generation = 0
 
 #data set is a list of dictionaries with the values
-def fitness_test(femaleRegex):
+def fitness_test(female_regex):
     global dataset
-    totalOccurences=0
-    correctGuesses=0
-    incorrectGuesses=0
+    total = 0.
+    correct = 0.
+    incorrect = 0.
     
-    totalRunningTime = 0
+    running_time = 0.
 
-    regex = re.compile(femaleRegex)
+    regex = re.compile(female_regex)
 
     for record in dataset:
         result = 'M'
-        totalOccurences += int(record['occurences'])
+        occurences = int(record['occurences'])
+        total += occurences
         
         if re.search(regex, record['name']) is not None:
             result = 'F'
 
         if record['gender'] == result:
-            correctGuesses += int(record['occurences'])
+            correct += occurences
         else:
-            incorrectGuesses += int(record['occurences'])
+            incorrect += occurences
             
 
-    fitnessScore =  (((float(correctGuesses) - float(incorrectGuesses)) / float(totalOccurences)) + 1.0) / len(femaleRegex) **.001
-    #fitnessScore = (((float(correctGuesses) - float(incorrectGuesses)) / float(totalOccurences)) + 1.0) / 1.0
-
-    return fitnessScore
+    score = ((correct - incorrect) / total + 1.0) / (len(female_regex) **.001)
+    
+    return score
 
 def generate_dataset():
-    data = open('names/yob1980.txt')
-
-    for line in data.readlines():
-        split = line.split(',')
-        dataset.append({'name' : split[0], 'gender' : split[1], 'occurences' : split[2]})
+    with open('names/yob1980.txt') as f:
+        for line in f:
+            name, gender, occurences = line.split(',')
+            dataset.append({'name' : name,
+                            'gender' : gender,
+                            'occurences' : occurences})
 
 def accuracy(femaleRegex):
     global generation
