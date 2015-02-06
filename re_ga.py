@@ -12,7 +12,7 @@ def fitness_test(ge, print_flag=False):
     total = 0.
     correct = 0.
     incorrect = 0.
-
+    
     female_regex = ge.build_re()
     regex = re.compile(female_regex)
 
@@ -110,7 +110,6 @@ class Pool(object):
         self.fitness = fitness
         self.ge = [GeneratedExpression([]) for _ in xrange(size)]
         self.generation = 0
-        self._mp_pool = multiprocessing.Pool(4)
         
     def run(self, number_of_generations=10):
 
@@ -122,8 +121,7 @@ class Pool(object):
 
     @property
     def scores(self):
-        #scores = [(ge, self.fitness(ge.build_re())) for ge in self.ge]
-        scores = self._mp_pool.map(self.fitness, self.ge)
+        scores = [self.fitness(ge) for ge in self.ge]
         return sorted(scores, key=lambda t: t[1], reverse=True)
     
     def strategy(self, scores):
@@ -147,7 +145,7 @@ if __name__ == "__main__":
 
             print #print a linebreak
             print 'Generation : ' + str(self.generation)
-            fitness_test(scores[0][0].build_re(), print_flag=True)
+            fitness_test(scores[0][0], print_flag=True)
 
             return top + mutations + branch + spliced + smart_mutations
 
