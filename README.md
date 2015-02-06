@@ -16,10 +16,15 @@ Naturally we wanted to out do him. We start by assuming the name is male and if 
 the psuedo-randomly generated regular expression we assume its female. Here are the results of the most recent run.
 
 RE : (nah|rah|jo|ys|ifer|uz|ndy|beth|mn|igh|yn|mmer|ber|cy|tal|ril|say|zy|nn|vy|sy|nay|udy|any|i|ko|e|a|ty|iny|idy|men|lah|ly|gy|yah|eah|mah|tay|fy|gen|ail|eny|kah|bil|nn|ren|ten|wny|dah|tny)$
+
 Correct Guesses : 2955175
+
 Incorrect Guesses : 488278
+
 Total Occurences : 3443453
+
 Fitness Score : 1.70744686895
+
 % Accuracy : 0.858201055743
 
 The data thats been tested against is yob1980.txt file found at the above url.
