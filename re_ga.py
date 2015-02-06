@@ -65,7 +65,7 @@ def get_random_chars(floor, ceiling):
 
 def get_random_operator():
     #TODO feminine names are mostly defined by suffix, weight accordingly
-    return choice(['^', '$'])
+    return choice(['^', '$','*'])
 
 #Main GA class
 class GeneratedExpression(object):
@@ -84,9 +84,11 @@ class GeneratedExpression(object):
         self.nodes = [node for node in self.nodes if node.value != '']
         startswith = [n.value for n in self.nodes if n.operator == '^']
         endswith = [n.value for n in self.nodes if n.operator == '$']
+        contains = [n.value for n in self.nodes if n.operator == '*']
         
         return '(' + '|'.join(endswith) + ')$' + '|' + \
-               '^(' + '|'.join(startswith) + ')'
+               '^(' + '|'.join(startswith) + ')' + '|' + \
+               '^.+(' + '|'.join(contains) + ').+$'
 
     def branch_out(self):
         
