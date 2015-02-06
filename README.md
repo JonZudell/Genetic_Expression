@@ -6,26 +6,26 @@ What started to concern us more was how accurate the "algorithm" was at determin
 dataset(http://www.ssa.gov/OACT/babynames/limits.html) of names and occurence and ran the algorithm against it. These are
 the results
 
-Correct Guesses: 258522673
-Incorrect Guesses: 74895097
-Total Guesses 333417770
+|Parameters       | Numbers   |
+|-----------------|:---------:|
+|Correct Guesses  | 258522673 |
+|Incorrect Guesses| 74895097  |
+|Total Occurences | 333417770 |
+|% Accuracy       | ~0.775    |
 
 It evaluated in ~11.352 seconds with an ~77% accuracy.
 
 Naturally we wanted to out do him. We start by assuming the name is male and if we find a match our pseudo-randomly with
 the psuedo-randomly generated regular expression we assume its female. Here are the results of the most recent run.
-
+```regex
 RE : (nah|rah|jo|ys|ifer|uz|ndy|beth|mn|igh|yn|mmer|ber|cy|tal|ril|say|zy|nn|vy|sy|nay|udy|any|i|ko|e|a|ty|iny|idy|men|lah|ly|gy|yah|eah|mah|tay|fy|gen|ail|eny|kah|bil|nn|ren|ten|wny|dah|tny)$
-
-Correct Guesses : 2955175
-
-Incorrect Guesses : 488278
-
-Total Occurences : 3443453
-
-Fitness Score : 1.70744686895
-
-% Accuracy : 0.858201055743
+```
+|Parameters       | Numbers   |
+|-----------------|:---------:|
+|Correct Guesses  | 2955175   |
+|Incorrect Guesses| 488278    |
+|Total Guesses    | 3443453   |
+|% Accuracy       | 0.858201055743|
 
 The data thats been tested against is yob1980.txt file found at the above url.
 
