@@ -2,6 +2,13 @@ import string
 import re
 from random import choice, randint, sample
 
+class Gene(object):
+    def __init__(self, operator, value):
+        self.value = value
+        self.operator = operator
+    def copy(self):
+        return Gene(self.operator, self.value)
+    
 REOR = '|'
 dataset = []
 
@@ -56,6 +63,10 @@ def get_random_chars(floor, ceiling):
     r = range(randint(floor, ceiling))
     return ''.join([choice(string.ascii_lowercase) for _ in r])
 
+def get_random_operator():
+    #TODO feminine names are mostly defined by suffix, weight accordingly
+    return choice(['^', '$'])
+
 #Main GA class
 class GeneratedExpression(object):
 
@@ -65,43 +76,58 @@ class GeneratedExpression(object):
         
         if len(self.nodes) == 0:
             for x in xrange(0,randint(5,20)):
-                self.nodes.append(get_random_chars(1,5))
+                v, o = get_random_chars(1,5), get_random_operator()
+                self.nodes.append(Gene(o, v))
             
     def build_re(self):
-        self.nodes = [node for node in self.nodes if node != '']
-        return '(' + '|'.join(self.nodes) + ')$'
+
+        self.nodes = [node for node in self.nodes if node.value != '']
+        startswith = [n.value for n in self.nodes if n.operator == '^']
+        endswith = [n.value for n in self.nodes if n.operator == '$']
+        
+        return '(' + '|'.join(endswith) + ')$' + '|' + \
+               '^(' + '|'.join(startswith) + ')'
 
     def branch_out(self):
         
         result = self.copy()
-        x = randint(0, len(result.nodes)  - 1)
-        left_value = get_random_chars(1,1) + result.nodes[x]
-        right_value = get_random_chars(1,1) + result.nodes[x]
 
-        result.nodes[x] = left_value
-        result.nodes.insert(x + 1, right_value)
+        x = randint(0, len(result.nodes) - 1)
+        node = result.nodes[x]
+        left_value = get_random_chars(1, 1) + node.value
+        right_value = get_random_chars(1, 1) + node.value
+
+        result.nodes[x] = Gene(get_random_operator(), left_value)
+        result.nodes.insert(x + 1, Gene(get_random_operator(), right_value))
         return result
         
     def mutate(self):
+        
         result = self.copy()
-        x = randint(0,len(self.nodes) - 1)
-        result.nodes[x] = get_random_chars(0,3)
+        node = choice(result.nodes)
+
+        node.value = get_random_chars(0,3)
+        node.operator = get_random_operator()
+        
         return result
 
     def smart_mutate(self):
+        
         result = self.copy()
-        x = randint(0,len(self.nodes) - 1)
-        result.nodes.append(get_random_chars(1,1) + result.nodes[x][1:])
+        node = choice(result.nodes)
+        value = get_random_chars(1,1) + node.value[1:]
+        result.nodes.append(Gene(node.operator, value))
+        
         return result
                          
     def splice(self, other):
         result = self.copy()
         result.nodes = sample(result.nodes, randint((len(result.nodes) - 1) / 5, (len(result.nodes) - 1) / 2)) + \
-                       sample(other.nodes, randint((len(other.nodes) - 1)/ 5, (len(other.nodes) - 1) / 2))
+                       sample([n.copy() for n in other.nodes], randint((len(other.nodes) - 1)/ 5, (len(other.nodes) - 1) / 2))
         return result
         
     def copy(self):
-        result = GeneratedExpression([x for x in self.nodes])
+        result = GeneratedExpression([x.copy() for x in self.nodes])
         return result
         
 class Pool(object):
@@ -150,4 +176,4 @@ if __name__ == "__main__":
             return top + mutations + branch + spliced + smart_mutations
 
     pool = MyPool(fitness_test)
-    print pool.run(1000) #run x generatations and print the results
+    print pool.run(10000) #run x generatations and print the results
